@@ -1,0 +1,15 @@
+click==8.0.1
+Flask==2.0.1
+itsdangerous==2.0.1
+Jinja2==3.0.1
+MarkupSafe==2.0.1
+numpy==1.20.3
+pandas==1.2.4
+patsy==0.5.1
+plotly==4.14.3
+shap
+matplotlib
+plotly-express==0.4.1
+requests
+ipython
+gunicorn

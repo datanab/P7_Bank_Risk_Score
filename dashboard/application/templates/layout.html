@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="{{url_for('static', filename = 'css/bootstrap.css')}}" type="text/css"/>
+    <link rel="stylesheet" href="{{url_for('static', filename = 'css/bootstrap.min.css')}}" type="text/css"/>
+    <link rel="stylesheet" href="{{url_for('static', filename = 'css/aos.css')}}"  type="text/css"/>
+    <link rel="stylesheet" href="{{url_for('static', filename = 'css/main.css')}}" type="text/css"/>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"/>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <script src="{{url_for('static', filename='js/bootstrap.bundle.min.js.js')}}"></script>
+    <script src="{{url_for('static', filename='js/jquery-3.5.0.js.js')}}"></script>
+    <title>Prêt à dépenser</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Prêt à dépenser</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </div>
+    </nav>
+
+    <br>
+    <br>
+
+    <div class="container-fluid">
+      <form class="row d-flex justify-content-center" method = "post">  
+        <div class="col-4">
+          <label class="mx-2">Client ID :</label>
+          <input type="text" class="form-control" name = "client" placeholder="Client ID">
+        </div>
+        <div class="col-1">
+          <br>
+          <button type="submit" class="btn btn-primary w-100">Submit</button>
+        </div>
+      </form>
+    </div>
+
+    <br>
+
+    <p id="response" style="text-align:center;"> {{ response.class }} </p>
+    
+    <div class="container-fluid px-4">
+      <div class="row">
+        <div class="col-4" id="chart1">
+          <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+            <script type="text/javascript">
+                var graphs1 = JSON.parse('{{ graph1JSON | safe}}');
+                Plotly.plot("chart1", graphs1,{});
+            </script>
+        </div>
+        <div class="d-flex col-8 align-items-center"> <iframe srcdoc="{{shaplot}}" style="width:2000px;height:200px;border:none" ></iframe></div>
+      </div>
+      
+    </div>
+
+    <div class="container-fluid">
+      <div class="row px-4">
+        <div class="col-6">
+          <h2 class="w-50 mx-auto"> General Information</h2>
+          <br> 
+          <div class="w-75 mx-auto">
+            <form method="get" action="">
+              <select class="js-select2 w-100" multiple="multiple" onchange="selection()" name="client_info" id = "selector">
+                {% for item in plop %}
+                  <option selected value={{item}}> {{item}} </option>
+                {% endfor %}
+              </select>
+            </form> 
+          </div>
+          <br>
+          <table class="table" id="myTable">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">{{client_id}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in plop %}
+                <tr id = {{item}}>
+                  <th scope="row">{{item}}</th>
+                  <td >{{plop[item]}}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <script type="text/javascript">
+            function selection() {
+              for (let pas = 0; pas < 9; pas++) {
+                var y = document.getElementById("selector").options[pas];
+                var s = y.text.toString();
+                var t = y.selected;
+                switch (s) {
+                  case 'Housing type':
+                    s = "Housing";
+                    break;
+                  case 'Family status':
+                    s = "Family";
+                    break;
+                  case 'Number of children':
+                    s = "Number";
+                    break;
+                }
+                if(t==false){
+                  $("#"+s).hide(); 
+                  $("#"+s+"_").hide(); 
+                }
+                else{
+                  $("#"+s).show(); 
+                  $("#"+s+"_").show(); 
+                }
+              }
+            }            
+          </script>
+        </div>
+        <div class="col-6">
+          <h2 class="w-50 mx-auto"> Comparaison</h2>
+          <br>
+          <div class = "row">
+            <div class = "col-3">
+              <p>Occupation :</p>
+              <select class="form-select col-3" onchange="comp_table()" name = "select_occ" aria-label=".form-select-lg example" id = "select_occ">
+                <option selected>Tous</option>
+                {% for occupation in liste_occupation %}
+                  <option value={{occupation}}>{{occupation}}</option>
+                {% endfor %}
+              </select> 
+            </div>
+            <div class = "col-3">
+              <p>Family status :</p>
+              <select class="form-select col-3" onchange="comp_table()" name = "select_fam" aria-label=".form-select-lg example" id = "select_fam">
+                <option selected>Tous</option>
+                {% for fam_stat in liste_family_status %}
+                  <option value={{fam_stat}}>{{fam_stat}}</option>
+                {% endfor %}
+              </select> 
+            </div>
+            <div class = "col-3">
+              <p>Age :</p>
+              <select class="form-select col-3" onchange="comp_table()" name = "select_age" aria-label=".form-select-lg example" id = "select_age">
+                <option selected>Tous</option>
+                {% for age_class in liste_age_class %}
+                  <option value={{age_class}}>{{age_class}}</option>
+                {% endfor %}
+              </select> 
+            </div> 
+          </div>
+          <br>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">GROUPE</th>
+                <th scope="col">MIN</th>
+                <th scope="col">MEAN</th>
+                <th scope="col">MAX</th>
+                <th scope="col">MODE</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in comparaison_table %}
+                <tr id = {{comparaison_table[item].id}}>
+                  <th scope="row">{{item}}</th>
+                  <td id={{ids[item].min}}>{{comparaison_table[item].min}}</td>
+                  <td id={{ids[item].mean}}>{{comparaison_table[item].mean}}</td>
+                  <td id={{ids[item].max}}>{{comparaison_table[item].max}}</td>
+                  <td id={{ids[item].mode}}>{{comparaison_table[item].mode}}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+
+    <h2 style = "margin-left:30px"> Credit Informations</h2>
+    <br>
+    <div class="form-check form-check-inline" style = "margin-left:30px">
+      <input class="form-check-input" onchange="credit_graph()" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1" >
+      <label class="form-check-label" for="inlineRadio1">MIN</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" onchange="credit_graph()" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2" checked>
+      <label class="form-check-label" for="inlineRadio2">MEAN</label selected>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" onchange="credit_graph()" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="option3">
+      <label class="form-check-label" for="inlineRadio3">MAX</label>
+    </div>
+    <br>
+    <div class="row px-4">
+      <div class="col-4" id = "income">
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script type="text/javascript">
+            var figures = JSON.parse('{{ income_mean | safe}}');
+            Plotly.plot("income", figures, {});
+        </script>
+      </div>
+      <div class="col-4" id = "credit">
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script type="text/javascript">
+            var figures = JSON.parse('{{ credit_mean | safe}}');
+            Plotly.plot("credit", figures, {});
+        </script>
+      </div>
+      <div class="col-4" id = "annuity">
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script type="text/javascript">
+            var figures = JSON.parse('{{ annuity_mean | safe}}');
+            Plotly.plot("annuity", figures, {});
+        </script>
+      </div>
+      <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+      <script type="text/javascript">
+        var income_mean = JSON.parse('{{ income_mean | safe}}');
+        var income_min = JSON.parse('{{ income_min | safe}}');
+        var income_max = JSON.parse('{{ income_max | safe}}');
+        var credit_mean = JSON.parse('{{ credit_mean | safe}}');
+        var credit_min = JSON.parse('{{ credit_min | safe}}');
+        var credit_max = JSON.parse('{{ credit_max | safe}}');
+        var annuity_mean = JSON.parse('{{ annuity_mean | safe}}');
+        var annuity_min = JSON.parse('{{ annuity_min | safe}}');
+        var annuity_max = JSON.parse('{{ annuity_max | safe}}');
+        Plotly.newPlot("income", income_mean,{});
+        Plotly.newPlot("credit", credit_mean,{});
+        Plotly.newPlot("annuity", annuity_mean,{});
+        function credit_graph(){
+          var rdbtn1 = document.getElementById("inlineRadio1");
+          var rdbtn2 = document.getElementById("inlineRadio2");
+          var rdbtn3 = document.getElementById("inlineRadio3");
+          if (rdbtn1.checked==true){
+            Plotly.newPlot("income", income_min,{});
+            Plotly.newPlot("credit", credit_min,{});
+            Plotly.newPlot("annuity", annuity_min,{});
+          }
+          if (rdbtn2.checked==true){
+            Plotly.newPlot("income", income_mean,{});
+            Plotly.newPlot("credit", credit_mean,{});
+            Plotly.newPlot("annuity", annuity_mean,{});
+          }
+          if (rdbtn3.checked==true){
+            Plotly.newPlot("income", income_max,{});
+            Plotly.newPlot("credit", credit_max,{});
+            Plotly.newPlot("annuity", annuity_max,{});
+          }
+        } 
+      </script>
+    </div>
+
+    <footer class="bg-primary text-center text-lg-start">
+      <div class="text-center pt-4" style="color: rgb(255, 255, 255);">
+        Openclassrooms : Implémentez un modèle de scoring - 2022 
+      </div>
+      <div class="text-center p-4" style="color: rgb(255, 255, 255);">
+        Auteur : TIGHIDET Nabil
+      </div>
+    </footer>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+      <script type="text/javascript">
+        function completion(s){
+          var dict = {
+            "Core": "Core staff",
+            "Sales": "Sales staff",
+            "Cleaning": "Cleaning staff",
+            "Cooking": "Cooking staff",
+            "Private": "Private service staff",
+            "Medicine": "Medicine staff",
+            "Security": "Security staff",
+            "High": "High skill tech staff",
+            "Waiters/barmen": "Waiters/barmen staff",
+            "Low-skill": "Low-skill Laborers",
+            "Realty": "Realty agents",
+            "IT": "IT staff",
+            "HR": "HR staff",
+            "Single" : "Single / not married",
+            "Civil": "Civil marriage",
+            "20":"20 - 30 y.o.",
+            "30":"30 - 40 y.o.",
+            "40":"40 - 50 y.o.",
+            "more":"more than 50 y.o."
+          };
+          var completed = s
+          if (s in dict){
+            completed = dict[s]
+          }
+          return completed
+        }
+        function comp_table(){
+          var occ = document.getElementById("select_occ").value;
+          var fam = document.getElementById("select_fam").value;
+          var age = document.getElementById("select_age").value;
+          occ = completion(occ);
+          fam = completion(fam);
+          age = completion(age);
+          var key = occ + "_" + fam + "_" + age;
+          var dop = {{ drapo | safe }};
+          var pop = {{ comparaison_table | safe }};
+          document.getElementById("Gender_mode").innerHTML = dop[occ + "_" + fam + "_" + age + "_CODE_GENDER_mode"];
+          document.getElementById("Occupation_mode").innerHTML = dop[occ + "_" + fam + "_" + age + "_OCCUPATION_TYPE_mode"];
+          document.getElementById("Housing_mode").innerHTML = dop[occ + "_" + fam + "_" + age + "_NAME_HOUSING_TYPE_mode"];
+          document.getElementById("Family_mode").innerHTML = dop[occ + "_" + fam + "_" + age + "_NAME_FAMILY_STATUS_mode"];
+          document.getElementById("Vehicle_mode").innerHTML = dop[occ + "_" + fam + "_" + age + "_FLAG_OWN_CAR_mode"];
+          document.getElementById("Realty_mode").innerHTML = dop[occ + "_" + fam + "_" + age + "_FLAG_OWN_REALTY_mode"];
+          document.getElementById("Number_min").innerHTML = dop[occ + "_" + fam + "_" + age + "_CNT_CHILDREN_min"];
+          document.getElementById("Number_mean").innerHTML = dop[occ + "_" + fam + "_" + age + "_CNT_CHILDREN_mean"];
+          document.getElementById("Number_max").innerHTML = dop[occ + "_" + fam + "_" + age + "_CNT_CHILDREN_max"];
+          document.getElementById("Age_min").innerHTML = dop[occ + "_" + fam + "_" + age + "_DAYS_BIRTH_min"];
+          document.getElementById("Age_mean").innerHTML = dop[occ + "_" + fam + "_" + age + "_DAYS_BIRTH_mean"];
+          document.getElementById("Age_max").innerHTML = dop[occ + "_" + fam + "_" + age + "_DAYS_BIRTH_max"];
+        }
+      </script>
+    <script src="{{url_for('static', filename='js/popper.js')}}"></script>
+    <script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/select2.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/main.js')}}"></script>
+</body>
+</html>
